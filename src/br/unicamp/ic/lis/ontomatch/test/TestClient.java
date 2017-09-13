@@ -1,0 +1,52 @@
+package br.unicamp.ic.lis.ontomatch.test;
+
+import java.io.IOException;
+
+import javax.ws.rs.core.MediaType;
+
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.api.json.JSONConfiguration;
+
+public class TestClient {
+	public static void main(String[] args) throws IOException, JSONException {
+		getResource();
+	}
+
+	private static void getResource() throws IOException, JSONException{
+		String params = "{text:Chest Pain, similarity:0.7, ontology:hfo}";
+		JSONObject jsonParams = new JSONObject(params);
+
+		System.out.println(jsonParams);
+		ClientConfig clientConfig = new DefaultClientConfig();
+		clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
+
+		Client client = Client.create(clientConfig);
+		WebResource webResource = client.resource("http://localhost:8080/OntoMatch/rest/resource");
+
+		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON).type(MediaType.APPLICATION_JSON).post(ClientResponse.class, jsonParams);
+
+		if (response.getStatus() != 200) {
+			throw new RuntimeException("Failed : HTTP error code : "+ response.getStatus());
+		}
+		String responseBody = response.getEntity(String.class);
+
+		System.out.println("Response: " + responseBody);
+		JSONObject responseJson = new JSONObject(responseBody);
+		System.out.println("Response Json: "+ responseJson);
+
+
+		JSONObject resourceJSON = responseJson.getJSONObject("entity");
+
+		System.out.println("Resource: " + resourceJSON);
+		System.out.println("URI: " + resourceJSON.get("uri"));
+
+	}
+
+}
