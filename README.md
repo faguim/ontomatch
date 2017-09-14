@@ -4,7 +4,7 @@ Projeto para buscar termos em uma dada ontologia.
 
 Existem dois métodos que atendem chamada REST e devolvem um JSON:
 <li>
-	JSONWithPadding getResources(String params) 
+	<lu>JSONWithPadding getResources(String params)</lu> 
 	JSONWithPadding getResource(String params)
 </li>
 	
