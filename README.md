@@ -1,4 +1,4 @@
-<h1>OntoMatch<h1>
+<h1>OntoMatch</h1>
 
 Projeto para buscar termos em uma dada ontologia.
 
