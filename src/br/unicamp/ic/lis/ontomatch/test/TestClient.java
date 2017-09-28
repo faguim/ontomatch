@@ -18,7 +18,7 @@ import com.sun.jersey.api.json.JSONConfiguration;
 public class TestClient {
 	public static void main(String[] args) throws IOException, JSONException {
 		getResource();
-		getResources();
+		//getResources();
 	}
 
 	private static void getResource() throws IOException, JSONException{
@@ -30,7 +30,7 @@ public class TestClient {
 		clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
 
 		Client client = Client.create(clientConfig);
-		WebResource webResource = client.resource("http://localhost:8080/OntoMatch/rest/resource");
+		WebResource webResource = client.resource("http://ontomatch.lis.ic.unicamp.br/api/rest/resource");
 
 		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON).type(MediaType.APPLICATION_JSON).post(ClientResponse.class, jsonParams);
 
@@ -78,7 +78,7 @@ public class TestClient {
 		for (int i = 0; i < resourcesJSON.length(); i++) {
 			System.out.println("label: " + ((JSONObject)resourcesJSON.get(i)).get("label"));
 		}
-		
+//		
 
 	}
 }

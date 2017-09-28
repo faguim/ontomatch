@@ -8,7 +8,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.jena.query.Query;
@@ -22,8 +21,6 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.util.FileManager;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-
-import com.sun.jersey.api.json.JSONWithPadding;
 
 import br.unicamp.ic.lis.ontomatch.model.Resource;
 
@@ -43,8 +40,8 @@ public class Matcher {
 	@POST
 	@Path("/resource")
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces({ "application/x-javascript", MediaType.APPLICATION_JSON + ";charset=utf-8" })
-	public JSONWithPadding getResource(String params) throws JSONException {
+	@Produces(MediaType.APPLICATION_JSON)
+	public Resource getResource(String params) throws JSONException {
 	
 		JSONObject jsonParams = new JSONObject(params);
 
@@ -82,14 +79,14 @@ public class Matcher {
 			resource.setSimilarity(result.getLiteral("similarity").getDouble());
 		}
 		
-		return new JSONWithPadding(new GenericEntity<Resource>(resource) {});
+		return resource;
 	}
 	
 	@POST
 	@Path("/resources")
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces({ "application/x-javascript", MediaType.APPLICATION_JSON + ";charset=utf-8" })
-	public JSONWithPadding getResources(String params) throws JSONException {
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<Resource> getResources(String params) throws JSONException {
 		List<Resource> resources = new ArrayList<>();
 		
 		JSONObject jsonParams = new JSONObject(params);
@@ -128,7 +125,7 @@ public class Matcher {
 			
 			resources.add(resource);
 		}
-		return new JSONWithPadding(new GenericEntity<List<Resource>>(resources) {});
+		return resources;
 	}
 	
 	private Model getModel(String ontology) {
