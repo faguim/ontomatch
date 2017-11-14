@@ -149,7 +149,7 @@ public class Matcher {
 				+ "PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#> "
 				+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> "
 				+ "PREFIX f: <java:"+this.getClass().getPackage().getName()+".> "
-				+ "SELECT DISTINCT ?property "
+				+ "SELECT DISTINCT ?resource ?property ?value "
 				+ "WHERE { ");
 
 		queryString.append("?resource rdfs:label ?label FILTER (f:LevenshteinFilter(?label, \"" + text + "\") >= "+ similarity + ") .");
@@ -160,7 +160,7 @@ public class Matcher {
 //				+ text + "\") >= " + similarity + ")} ");
 //		queryString.append("UNION {?resource oboinowl:hasRelatedSynonym ?label . FILTER (f:LevenshteinFilter(?label, \""
 //				+ text + "\") >= " + similarity + ")} ");
-		queryString.append("} ");
+		queryString.append("} ORDER BY DESC(f:LevenshteinFilter(?label, \"" + text + "\")) ");
 //				+ "ORDER BY DESC(f:LevenshteinFilter(?label, \"" + text + "\")) LIMIT 1");
 System.out.println(queryString);
 		Query sparql = QueryFactory.create(queryString.toString());
@@ -168,13 +168,18 @@ System.out.println(queryString);
 		ResultSet rs = qExec.execSelect();
 		while (rs.hasNext()) {
 			QuerySolution result = rs.nextSolution();
+//			System.out.println(result.getResource(arg0));
 			Iterator<String> variables = result.varNames();
 //			while (variables.hasNext()) {
 //				System.out.println(variables.next());
 ////				QuerySolution querySolution = (QuerySolution) rs.next();
 //				
 //			}
-			System.out.println(result.get("property"));
+			System.out.print("Resource: "+result.get("resource"));
+
+			System.out.print(" | Property: "+result.get("property"));
+
+			System.out.println(" | Value: "+result.get("value"));
 //			resource.setUri(result.get("resource").toString());
 //			resource.setSimilarity(result.getLiteral("similarity").getDouble());
 		}
