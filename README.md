@@ -18,6 +18,7 @@ Available **algorithmIDs** for string similarity and distance measures:
 [`JaroWinkler`](https://github.com/tdebatty/java-string-similarity#jaro-winkler),
 [`Cosine`](https://github.com/tdebatty/java-string-similarity#cosine-similarity),
 [`Jaccard`](https://github.com/tdebatty/java-string-similarity#jaccard-index),
+[`MetricLCS`](https://github.com/tdebatty/java-string-similarity#metric-longest-common-subsequence)
 [`Levenshtein`](https://github.com/tdebatty/java-string-similarity#levenshtein),
 [`OptimalStringAlignment`](https://github.com/tdebatty/java-string-similarity#optimal-string-alignment)
 
