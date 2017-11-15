@@ -33,7 +33,7 @@ Available **algorithmIDs** for string similarity and distance measures:
 
    * `text=[string]`
    * `similarity=[float]` [between 0 and 1]
-   * `ontology=[ontologyID]` [see ontologyIDs] [Default = NormalizedLevenshtein]
+   * `ontology=[ontologyID]` [see ontologyIDs] 
    * `algorithm=[algorithmID]` [see algorithmIDs] [Default = NormalizedLevenshtein]
      
 
@@ -83,8 +83,8 @@ Available **algorithmIDs** for string similarity and distance measures:
 *  **Required POST Params:**
 
    * `text=[string]`
-   * `n=[float]` [the service will return the **n** most similar entities]
-   * `ontology=[ontologyID]` [see ontology IDs]
+   * `n=[float]` [the service will return the **n** most similar entities] [Default = 10]
+   * `ontology=[ontologyID]` [see ontology IDs] [Default = hfo]
    * `algorithm=[algorithmID]` [see algorithmIDs] [Default = NormalizedLevenshtein]
      
 
