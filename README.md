@@ -2,16 +2,18 @@
 
 Available at [http://ontomatch.lis.ic.unicamp.br](http://ontomatch.lis.ic.unicamp.br)
 
-This service parses a given text and returns associated entities (URIs) within an ontology. Associations are made using string similarity and distance measures over the `rdfs:label` and further `owl:AnnotationProperty` -- usually adopted for adding alternative labels).
+This service parses a given text and returns associated entities (URIs) within an ontology. Associations are made using string similarity and distance measures over the `rdfs:label` and further `owl:AnnotationProperty` annotations -- usually adopted as alternative labels.
 
-Available **ontologyIDs**
+Available **ontologyIDs**: 
 [`pato`](https://bioportal.bioontology.org/ontologies/HFO),
 [`tao`](https://bioportal.bioontology.org/ontologies/HFO),
 [`xao`](https://bioportal.bioontology.org/ontologies/HFO),
 [`hfo`](https://bioportal.bioontology.org/ontologies/HFO)
 
 
-Available **algorithmIDs** for string similarity and distance measures. The set of algorithms used in this project is based on the project [java-string-similarity](https://github.com/tdebatty/java-string-similarity). Please refer [to this link](https://github.com/tdebatty/java-string-similarity#overview) for further details.
+The set of algorithms used in this project is based on the project [java-string-similarity](https://github.com/tdebatty/java-string-similarity). Please refer [to this link](https://github.com/tdebatty/java-string-similarity#overview) for further details.
+
+Available **algorithmIDs** for string similarity and distance measures: 
 [`NormalizedLevenshtein`](https://github.com/tdebatty/java-string-similarity#normalized-levenshtein),
 [`JaroWinkler`](https://github.com/tdebatty/java-string-similarity#jaro-winkler),
 [`Cosine`](https://github.com/tdebatty/java-string-similarity#cosine-similarity),
