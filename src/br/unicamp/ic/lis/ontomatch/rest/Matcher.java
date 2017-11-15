@@ -95,20 +95,27 @@ public class Matcher {
 
 		JSONObject jsonParams = new JSONObject(params);
 
-		String text = jsonParams.getString("text");
-		String n = jsonParams.getString("n");
-		String ontology = jsonParams.getString("ontology");
-
-		StringBuffer query = new StringBuffer();
+		String text = jsonParams.getString("text"); 
+		String n = jsonParams.optString("n","10");
+		String ontology = jsonParams.optString("ontology", "hfo");
+		String algorithm = jsonParams.optString("algorithm", "NormalizedLevenshtein");
 		
+		String order = "DESC";
+		
+		if(algorithm.equals("Levenshtein") || algorithm.equals("OptimalStringAlignment"))
+			order = "ASC";
+			
+			
+
+		StringBuffer query = new StringBuffer();		
 		query.append("PREFIX owl:       <http://www.w3.org/2002/07/owl#> \n");
 		query.append("PREFIX rdf:       <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n");
 		query.append("PREFIX rdfs:      <http://www.w3.org/2000/01/rdf-schema#> \n");
 		query.append("PREFIX oboinowl:  <http://www.geneontology.org/formats/oboInOwl#> \n");
 		query.append("PREFIX xsd:       <http://www.w3.org/2001/XMLSchema#> \n"); 
-		query.append("PREFIX ontomatch: <java:"+ this.getClass().getPackage().getName() + ".> \n");
+		query.append("PREFIX ontomatch: <java:br.unicamp.ic.lis.ontomatch.filters.> \n");
 		
-		query.append("SELECT DISTINCT ?resource ?label (ontomatch:NormalizedLevenshteinFilter(?label, \"" + text + "\") as ?similarity) \n"); // ?altlabel (ontomatch:NormalizedLevenshteinFilter(?altlabel, \""+text+"\") as ?similarityaltlabel) \n");
+		query.append("SELECT DISTINCT ?resource ?label (ontomatch:"+algorithm+"Filter(?label, \"" + text + "\") as ?similarity) \n"); // ?altlabel (ontomatch:NormalizedLevenshteinFilter(?altlabel, \""+text+"\") as ?similarityaltlabel) \n");
 		query.append("WHERE{ \n");
 		query.append("                 { ?resource        rdfs:label      ?label                 .   }   \n");
 		query.append("            UNION                                                                  \n");
@@ -116,7 +123,7 @@ public class Matcher {
 		query.append("                   ?resource        ?annotation     ?label                 .   }   \n");
  
 		query.append("     } \n");
-		query.append("ORDER BY DESC(?similarity) \n");
+		query.append("ORDER BY "+order+"(?similarity) \n");
 		query.append("LIMIT " + n);
 
 		if(debbug)
