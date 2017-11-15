@@ -18,8 +18,8 @@ import com.sun.jersey.api.json.JSONConfiguration;
 public class TestClient {
 	public static void main(String[] args) throws IOException, JSONException {
 //		getResource();
-//		getResources();
-		getWholeResource();
+		getResources();
+//		getWholeResource();
 	}
 
 	private static void getResource() throws IOException, JSONException{

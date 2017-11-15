@@ -19,45 +19,47 @@ import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.sparql.function.library.print;
 import org.apache.jena.util.FileManager;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import br.unicamp.ic.lis.ontomatch.model.Resource;
 
-
 @Path("")
 public class Matcher {
-	
-	public static String ontology_dir = "resources/ontologies/";
-	public static String pkg; 
-	public static Model model;
 
-	public final static String TAO = "tao";
-	public final static String PATO = "pato";
-	public final static String XAO = "xao";
-	public final static String HFO = "hfo";
+	public static String ontology_dir = "resources/ontologies/";
+	public static String pkg;
+	public static Model model;
 	
+	boolean debbug = true;
+
+
+//	public final static String TAO = "tao";
+//	public final static String PATO = "pato";
+//	public final static String XAO = "xao";
+//	public final static String HFO = "hfo";
+
 	@POST
 	@Path("/resource")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Resource getResource(String params) throws JSONException {
-	
+
 		JSONObject jsonParams = new JSONObject(params);
 
 		String similarity = jsonParams.getString("similarity");
 		String ontology = jsonParams.getString("ontology");
 		String text = jsonParams.getString("text");
 
-		
 		Resource resource = new Resource();
 
 		StringBuffer queryString = new StringBuffer();
 		queryString.append("PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "
 				+ "PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#> "
-				+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> "
-				+ "PREFIX f: <java:"+this.getClass().getPackage().getName()+".> "
+				+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " + "PREFIX f: <java:"
+				+ this.getClass().getPackage().getName() + ".> "
 				+ "SELECT DISTINCT ?resource ?label (f:LevenshteinFilter(?label, \"" + text + "\") as ?similarity)"
 				+ "WHERE { ");
 
@@ -79,121 +81,129 @@ public class Matcher {
 			resource.setUri(result.get("resource").toString());
 			resource.setSimilarity(result.getLiteral("similarity").getDouble());
 		}
-		
+
 		return resource;
 	}
-	
+
 	@POST
 	@Path("/resources")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Resource> getResources(String params) throws JSONException {
-		List<Resource> resources = new ArrayList<>();
 		
+		
+
 		JSONObject jsonParams = new JSONObject(params);
 
 		String text = jsonParams.getString("text");
 		String n = jsonParams.getString("n");
 		String ontology = jsonParams.getString("ontology");
+
+		StringBuffer query = new StringBuffer();
 		
-		StringBuffer queryString = new StringBuffer();
-		queryString.append("PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "
-				+ "PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#> "
-				+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> "
-				+ "PREFIX f: <java:"+this.getClass().getPackage().getName()+".> "
-				+ "SELECT DISTINCT ?resource ?label (f:LevenshteinFilter(?label, \"" + text + "\") as ?similarity) "
-				+ "WHERE { "
-				+ " { ?resource rdfs:label ?label} "
+		query.append("PREFIX owl:       <http://www.w3.org/2002/07/owl#> \n");
+		query.append("PREFIX rdf:       <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n");
+		query.append("PREFIX rdfs:      <http://www.w3.org/2000/01/rdf-schema#> \n");
+		query.append("PREFIX oboinowl:  <http://www.geneontology.org/formats/oboInOwl#> \n");
+		query.append("PREFIX xsd:       <http://www.w3.org/2001/XMLSchema#> \n"); 
+		query.append("PREFIX ontomatch: <java:"+ this.getClass().getPackage().getName() + ".> \n");
+		
+		query.append("SELECT DISTINCT ?resource ?label (ontomatch:NormalizedLevenshteinFilter(?label, \"" + text + "\") as ?similarity) \n"); // ?altlabel (ontomatch:NormalizedLevenshteinFilter(?altlabel, \""+text+"\") as ?similarityaltlabel) \n");
+		query.append("WHERE{ \n");
+		query.append("                 { ?resource        rdfs:label      ?label                 .   }   \n");
+		query.append("            UNION                                                                  \n");
+		query.append("                 { ?annotation      rdf:type        owl:AnnotationProperty .       \n");
+		query.append("                   ?resource        ?annotation     ?label                 .   }   \n");
+ 
+		query.append("     } \n");
+		query.append("ORDER BY DESC(?similarity) \n");
+		query.append("LIMIT " + n);
 
-//				+ "UNION {?resource oboinowl:hasExactSynonym ?label . } "
-//				+ "UNION {?resource oboinowl:hasRelatedSynonym ?label . } "
-
-				+ "}"
-				+ "ORDER BY DESC(?similarity) LIMIT "+n);
-
-		Query sparql = QueryFactory.create(queryString.toString());
-		System.out.println(queryString);
+		if(debbug)
+			System.out.println(query);
+		
+		
+		Query sparql = QueryFactory.create(query.toString());
 		QueryExecution qExec = QueryExecutionFactory.create(sparql, getModel(ontology));
 		ResultSet rs = qExec.execSelect();
 
+		List<Resource> resources = new ArrayList<>();
+
+		
 		while (rs.hasNext()) {
 			QuerySolution result = rs.nextSolution();
-			System.out.println(result);
+			System.out.println(result.toString());
 			Resource resource = new Resource();
 			resource.setLabel(result.getLiteral("label").getValue().toString());
 			resource.setUri(result.get("resource").toString());
 			resource.setSimilarity(result.getLiteral("similarity").getDouble());
 			
+			
+//			if(debbug)
+//				System.out.println(resource);
+			
 			resources.add(resource);
 		}
 		return resources;
 	}
-	
+
 	@POST
 	@Path("/wholeresource")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Resource getWholeResource(String params) throws JSONException {
-	
-		JSONObject jsonParams = new JSONObject(params);
+
+		JSONObject jsonParams = new JSONObject(params); 
 
 		String similarity = jsonParams.getString("similarity");
 		String ontology = jsonParams.getString("ontology");
 		String text = jsonParams.getString("text");
 
-		
 		Resource resource = new Resource();
 
 		StringBuffer queryString = new StringBuffer();
 		queryString.append("PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "
-				+ "PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#> "
-				+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> "
-				+ "PREFIX f: <java:"+this.getClass().getPackage().getName()+".> "
-				+ "SELECT DISTINCT ?resource ?property ?value "
-				+ "WHERE { ");
+				+ "PREFIX hfo: <http://bmi.utah.edu/ontologies/hfontology/> "
+				+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " + "PREFIX f: <java:"
+				+ this.getClass().getPackage().getName() + ".> "
+				+ "SELECT DISTINCT ?resource ?label ?upperClass ?value (f:LevenshteinFilter(?label, \"" + text
+				+ "\") as ?similarity)" + "WHERE { ");
 
-		queryString.append("?resource rdfs:label ?label FILTER (f:LevenshteinFilter(?label, \"" + text + "\") >= "+ similarity + ") .");
-		queryString.append("?resource ?property ?value ");
-//				+ similarity + " ");
+		queryString.append("{ ?resource rdfs:label ?label FILTER (f:LevenshteinFilter(?label, \"" + text + "\") >= " + similarity + ") } ");
+		queryString.append(" UNION {?resource hfo:altLabel ?label FILTER (f:LevenshteinFilter(?label, \"" + text + "\") >= " + similarity + ")} .");
+		queryString.append("{ ?resource rdfs:subClassOf ?upperClass  ");
+		queryString.append(" . ?upperClass rdfs:label ?value }");
 
-//		queryString.append("UNION {?resource oboinowl:hasExactSynonym ?label . FILTER (f:LevenshteinFilter(?label, \""
-//				+ text + "\") >= " + similarity + ")} ");
-//		queryString.append("UNION {?resource oboinowl:hasRelatedSynonym ?label . FILTER (f:LevenshteinFilter(?label, \""
-//				+ text + "\") >= " + similarity + ")} ");
-		queryString.append("} ORDER BY DESC(f:LevenshteinFilter(?label, \"" + text + "\")) ");
-//				+ "ORDER BY DESC(f:LevenshteinFilter(?label, \"" + text + "\")) LIMIT 1");
-System.out.println(queryString);
+		queryString.append("} ORDER BY DESC(?similarity) ");
+
+		System.out.println(queryString);
+
 		Query sparql = QueryFactory.create(queryString.toString());
 		QueryExecution qExec = QueryExecutionFactory.create(sparql, getModel(ontology));
 		ResultSet rs = qExec.execSelect();
+
 		while (rs.hasNext()) {
 			QuerySolution result = rs.nextSolution();
-//			System.out.println(result.getResource(arg0));
-			Iterator<String> variables = result.varNames();
-//			while (variables.hasNext()) {
-//				System.out.println(variables.next());
-////				QuerySolution querySolution = (QuerySolution) rs.next();
-//				
-//			}
-			System.out.print("Resource: "+result.get("resource"));
 
-			System.out.print(" | Property: "+result.get("property"));
+			System.out.print("Resource: " + result.get("resource"));
+			System.out.print(" | Label: " + result.get("label"));
 
-			System.out.println(" | Value: "+result.get("value"));
-//			resource.setUri(result.get("resource").toString());
-//			resource.setSimilarity(result.getLiteral("similarity").getDouble());
+			System.out.print(" | SubClassOf: " + result.get("upperClass"));
+			System.out.println(" | value: " + result.get("value"));
+
+//			System.out.println(" | Similarity: " + result.getLiteral("similarity").getDouble());
 		}
-		
+
 		return resource;
 	}
-	
+
 	private Model getModel(String ontology) {
 		model = ModelFactory.createDefaultModel();
 
 		InputStream in = FileManager.get().open(ontology_dir + ontology + ".xrdf");
 		System.out.println(in);
 		model.read(in, null);
-		
+
 		return model;
 	}
 }

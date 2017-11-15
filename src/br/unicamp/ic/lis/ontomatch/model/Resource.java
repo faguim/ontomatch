@@ -28,6 +28,6 @@ public class Resource {
 	}
 	@Override
 	public String toString() {
-		return "Resource [uri=" + uri + ", label=" + label + ", similarity=" + similarity + "]";
+		return "Resource [uri=" + uri + " | similarity=" + similarity + " | label=" + label + "]";
 	}
 }
