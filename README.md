@@ -2,7 +2,7 @@
 
 Available at [http://ontomatch.lis.ic.unicamp.br](http://ontomatch.lis.ic.unicamp.br)
 
-This service parses a given text and returns [possible]associated entities(URIs) within an ontology. Associations are made using string similarity and distance measures `rdfs:label` properties and further `owl:AnnotationProperty` annotations -- usually adopted as alternative labels.
+This service parses a given text and returns [possible]associated entities(URIs) within an ontology. Associations are made using string similarity and distance measures of `rdfs:label` properties and subsequent `owl:AnnotationProperty` annotations linked to the resource -- usually adopted for adding properties acting as alternative labels.
 
 Available **ontologyIDs**: 
 [`pato`](https://bioportal.bioontology.org/ontologies/PATO),
@@ -11,7 +11,7 @@ Available **ontologyIDs**:
 [`hfo`](https://bioportal.bioontology.org/ontologies/HFO)
 
 
-The set of algorithms used in this project is based on the project [java-string-similarity](https://github.com/tdebatty/java-string-similarity). Please refer [to this link](https://github.com/tdebatty/java-string-similarity#overview) for further details.
+The set of algorithms used in this project is based on the project [java-string-similarity](https://github.com/tdebatty/java-string-similarity). Please refer [to this link](https://github.com/tdebatty/java-string-similarity#overview) for further details and credits.
 
 Available **algorithmIDs** for string similarity and distance measures: 
 [`NormalizedLevenshtein`](https://github.com/tdebatty/java-string-similarity#normalized-levenshtein),
