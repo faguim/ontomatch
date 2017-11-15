@@ -2,12 +2,12 @@
 
 Available at [http://ontomatch.lis.ic.unicamp.br](http://ontomatch.lis.ic.unicamp.br)
 
-This service parses a given text and returns associated entities (URIs) within an ontology. Associations are made using string similarity and distance measures over the `rdfs:label` and further `owl:AnnotationProperty` annotations -- usually adopted as alternative labels.
+This service parses a given text and returns [possible]associated entities(URIs) within an ontology. Associations are made using string similarity and distance measures `rdfs:label` properties and further `owl:AnnotationProperty` annotations -- usually adopted as alternative labels.
 
 Available **ontologyIDs**: 
-[`pato`](https://bioportal.bioontology.org/ontologies/HFO),
-[`tao`](https://bioportal.bioontology.org/ontologies/HFO),
-[`xao`](https://bioportal.bioontology.org/ontologies/HFO),
+[`pato`](https://bioportal.bioontology.org/ontologies/PATO),
+[`tao`](https://bioportal.bioontology.org/ontologies/TAO),
+[`xao`](https://bioportal.bioontology.org/ontologies/XAO),
 [`hfo`](https://bioportal.bioontology.org/ontologies/HFO)
 
 
@@ -18,7 +18,8 @@ Available **algorithmIDs** for string similarity and distance measures:
 [`JaroWinkler`](https://github.com/tdebatty/java-string-similarity#jaro-winkler),
 [`Cosine`](https://github.com/tdebatty/java-string-similarity#cosine-similarity),
 [`Jaccard`](https://github.com/tdebatty/java-string-similarity#jaccard-index),
-[`NormalizedLevenshtein`](https://github.com/tdebatty/java-string-similarity#normalized-levenshtein)
+[`Levenshtein`](https://github.com/tdebatty/java-string-similarity#levenshtein),
+[`OptimalStringAlignment`](https://github.com/tdebatty/java-string-similarity#optimal-string-alignment)
 
 ### Based on a given similarity threshold (/api/rest/resource)
 
@@ -31,7 +32,7 @@ Available **algorithmIDs** for string similarity and distance measures:
 
    * `text=[string]`
    * `similarity=[float]` [between 0 and 1]
-   * `ontology=[ontologyID]` [see ontologyIDs]
+   * `ontology=[ontologyID]` [see ontologyIDs] [Default = NormalizedLevenshtein]
    * `algorithm=[algorithmID]` [see algorithmIDs] [Default = NormalizedLevenshtein]
      
 
