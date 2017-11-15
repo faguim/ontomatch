@@ -2,14 +2,21 @@
 
 Available at [http://ontomatch.lis.ic.unicamp.br](http://ontomatch.lis.ic.unicamp.br)
 
-The service parses a given text and returns entities (URIs) of an ontology.
+This service parses a given text and returns associated entities (URIs) within an ontology. Associations are made using string similarity and distance measures over the `rdfs:label` and further `owl:AnnotationProperty` -- usually adopted for adding alternative labels).
 
-Available **ontology IDs**
+Available **ontologyIDs**
 [`pato`](https://bioportal.bioontology.org/ontologies/HFO),
 [`tao`](https://bioportal.bioontology.org/ontologies/HFO),
 [`xao`](https://bioportal.bioontology.org/ontologies/HFO),
 [`hfo`](https://bioportal.bioontology.org/ontologies/HFO)
 
+
+Available **algorithmIDs** for string similarity and distance measures. The set of algorithms used in this project is based on the project [java-string-similarity](https://github.com/tdebatty/java-string-similarity). Please refer [to this link](https://github.com/tdebatty/java-string-similarity#overview) for further details.
+[`NormalizedLevenshtein`](https://github.com/tdebatty/java-string-similarity#normalized-levenshtein),
+[`JaroWinkler`](https://github.com/tdebatty/java-string-similarity#jaro-winkler),
+[`Cosine`](https://github.com/tdebatty/java-string-similarity#cosine-similarity),
+[`Jaccard`](https://github.com/tdebatty/java-string-similarity#jaccard-index),
+[`NormalizedLevenshtein`](https://github.com/tdebatty/java-string-similarity#normalized-levenshtein)
 
 ### Based on a given similarity threshold (/api/rest/resource)
 
@@ -22,7 +29,8 @@ Available **ontology IDs**
 
    * `text=[string]`
    * `similarity=[float]` [between 0 and 1]
-   * `ontology=[ontologyID]` [see ontology IDs]
+   * `ontology=[ontologyID]` [see ontologyIDs]
+   * `algorithm=[algorithmID]` [see algorithmIDs] [Default = NormalizedLevenshtein]
      
 
 * **Success Response:**
@@ -73,6 +81,7 @@ Available **ontology IDs**
    * `text=[string]`
    * `n=[float]` [the service will return the **n** most similar entities]
    * `ontology=[ontologyID]` [see ontology IDs]
+   * `algorithm=[algorithmID]` [see algorithmIDs] [Default = NormalizedLevenshtein]
      
 
 * **Success Response:**
