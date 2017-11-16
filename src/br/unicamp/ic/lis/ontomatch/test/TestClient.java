@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.ws.rs.core.MediaType;
 
+import org.apache.jena.atlas.json.JsonObject;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -18,8 +19,8 @@ import com.sun.jersey.api.json.JSONConfiguration;
 public class TestClient {
 	public static void main(String[] args) throws IOException, JSONException {
 //		getResource();
-		getResources();
-//		getWholeResource();
+//		getResources();
+		getWholeResource();
 	}
 
 	private static void getResource() throws IOException, JSONException{
@@ -84,7 +85,7 @@ public class TestClient {
 	}
 	
 	private static void getWholeResource() throws IOException, JSONException{
-		String params = "{text:Chest Pain, similarity:0.7, ontology:hfo}";
+		String params = "{text:Chest Pain, similarity:0.7, ontology:hfo, algorithm:Cosine}";
 		JSONObject jsonParams = new JSONObject(params);
 
 //		System.out.println(jsonParams);
@@ -101,9 +102,15 @@ public class TestClient {
 			throw new RuntimeException("Failed : HTTP error code : "+ response.getStatus());
 		}
 		String responseBody = response.getEntity(String.class);
-
+//System.out.println(responseBody);
 //		System.out.println("Response: " + responseBody);
-		JSONObject responseJson = new JSONObject(responseBody);
+		JSONArray jsonArray = new JSONArray(responseBody);
+		
+		for (int i = 0; i < jsonArray.length(); i++) {
+			System.out.println(jsonArray.get(i));
+		}
+		
+		System.out.println(jsonArray);
 //		System.out.println("Response Json: "+ responseJson);
 
 //		JSONObject resourceJSON = responseJson.getJSONObject("entity");
