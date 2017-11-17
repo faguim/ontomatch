@@ -85,7 +85,7 @@ public class TestClient {
 	}
 	
 	private static void getWholeResource() throws IOException, JSONException{
-		String params = "{text:Chest Pain, similarity:0.7, ontology:hfo, algorithm:Cosine}";
+		String params = "{text:Chest Pain, similarity:0.7, ontology:hfo, algorithm:Cosine, n:10, floor:0.0}";
 		JSONObject jsonParams = new JSONObject(params);
 
 //		System.out.println(jsonParams);
@@ -93,7 +93,7 @@ public class TestClient {
 		clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
 
 		Client client = Client.create(clientConfig);
-		WebResource webResource = client.resource("http://localhost:8080/OntoMatch/rest/wholeresource");
+		WebResource webResource = client.resource("http://localhost:8080/ontomatch/rest/wholeresource");
 //		WebResource webResource = client.resource("http://ontomatch.lis.ic.unicamp.br/api/rest/resource");
 
 		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON).type(MediaType.APPLICATION_JSON).post(ClientResponse.class, jsonParams);

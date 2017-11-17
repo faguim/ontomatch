@@ -1,5 +1,6 @@
 package br.unicamp.ic.lis.ontomatch.rest;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -9,7 +10,9 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -89,9 +92,8 @@ public class Matcher {
 
 	@POST
 	@Path("/resources")
-	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Resource> getResources(String params) throws JSONException {
+	public Response getResources(String params) throws JSONException, IOException {
 		
 		System.out.println("POST /resources");
 
@@ -133,33 +135,42 @@ public class Matcher {
 		
 		
 		Query sparql = QueryFactory.create(query.toString());
+		model = getModel(ontology);
 		QueryExecution qExec = QueryExecutionFactory.create(sparql, getModel(ontology));
 		ResultSet rs = qExec.execSelect();
 
 		List<Resource> resources = new ArrayList<>();
-
-		
-		while (rs.hasNext()) {
-			QuerySolution result = rs.nextSolution();
-			Resource resource = new Resource();
-			resource.setLabel(result.getLiteral("label").getValue().toString());
-			resource.setUri(result.get("resource").toString());
-			resource.setSimilarity(result.getLiteral("similarity").getDouble());
+		if (null != rs) {
+			while (rs.hasNext()) {
+				QuerySolution result = rs.nextSolution();
+				Resource resource = new Resource();
+				resource.setLabel(result.getLiteral("label").getValue().toString());
+				resource.setUri(result.get("resource").toString());
+				resource.setSimilarity(result.getLiteral("similarity").getDouble());
+				
+				
+				if(debbug)
+					System.out.println(resource);
+				
+				resources.add(resource);
+			}
 			
-			
-			if(debbug)
-				System.out.println(resource);
-			
-			resources.add(resource);
+			System.out.println(resources);
 		}
-		return resources;
+		GenericEntity<List<Resource>> resourcesReturn = new GenericEntity<List<Resource>>(resources){};
+		return Response.ok()
+				.entity(resourcesReturn)
+				.header("Access-Control-Allow-Origin", "*")
+				.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT")
+				.build();
+		
 	}
 
 	@POST
 	@Path("/wholeresource")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Resource> getWholeResource(String params) throws JSONException {
+	public List<Resource> getWholeResource(String params) throws JSONException, IOException {
 
 		JSONObject jsonParams = new JSONObject(params); 
 
@@ -221,7 +232,9 @@ public class Matcher {
 			parent.setLabel(result.getLiteral("value").getValue().toString());
 			parent.setUri(result.get("upperClass").toString());
 
-			resource.getParents().add(parent);
+			
+			if(!resource.getParents().contains(parent))
+				resource.getParents().add(parent);
 			
 //			System.out.println(resource);
 //			
@@ -239,12 +252,10 @@ public class Matcher {
 		return resources;
 	}
 
-	private Model getModel(String ontology) {
+	private Model getModel(String ontology) throws IOException {
 		model = ModelFactory.createDefaultModel();
 
-		InputStream in = FileManager.get().open(ontology_dir + ontology + ".xrdf");
-		model.read(in, null);
-
+		FileManager.get().readModel(model, ontology_dir + ontology + ".xrdf");
 		return model;
 	}
 }
