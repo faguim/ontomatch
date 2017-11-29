@@ -20,7 +20,7 @@ public class TestClient {
 	public static void main(String[] args) throws IOException, JSONException {
 //		getResource();
 //		getResources();
-		getWholeResource();
+		getMetaMapResource();
 	}
 
 	private static void getResource() throws IOException, JSONException{
@@ -84,8 +84,8 @@ public class TestClient {
 //		
 	}
 	
-	private static void getWholeResource() throws IOException, JSONException{
-		String params = "{text:Chest Pain, similarity:0.7, ontology:hfo, algorithm:Cosine, n:10, floor:0.0}";
+	private static void getMetaMapResource() throws IOException, JSONException{
+		String params = "{text: 'Female patient, 54 years old, with shortness of breath in the last 5 hours'}";
 		JSONObject jsonParams = new JSONObject(params);
 
 //		System.out.println(jsonParams);
@@ -93,7 +93,7 @@ public class TestClient {
 		clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
 
 		Client client = Client.create(clientConfig);
-		WebResource webResource = client.resource("http://localhost:8080/ontomatch/rest/wholeresource");
+		WebResource webResource = client.resource("http://localhost:8080/ontomatch/rest/metamap/resources");
 //		WebResource webResource = client.resource("http://ontomatch.lis.ic.unicamp.br/api/rest/resource");
 
 		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON).type(MediaType.APPLICATION_JSON).post(ClientResponse.class, jsonParams);
@@ -102,8 +102,6 @@ public class TestClient {
 			throw new RuntimeException("Failed : HTTP error code : "+ response.getStatus());
 		}
 		String responseBody = response.getEntity(String.class);
-//System.out.println(responseBody);
-//		System.out.println("Response: " + responseBody);
 		JSONArray jsonArray = new JSONArray(responseBody);
 		
 		for (int i = 0; i < jsonArray.length(); i++) {
@@ -111,11 +109,5 @@ public class TestClient {
 		}
 		
 		System.out.println(jsonArray);
-//		System.out.println("Response Json: "+ responseJson);
-
-//		JSONObject resourceJSON = responseJson.getJSONObject("entity");
-//
-//		System.out.println("Resource: " + resourceJSON);
-//		System.out.println("URI: " + resourceJSON.get("uri"));
 	}
 }

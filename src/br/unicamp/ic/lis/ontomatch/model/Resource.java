@@ -9,9 +9,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Resource {
 	private String uri;
 	private String label;
-	private double similarity;
 	
-	private List<Resource> parents = new ArrayList<>();
+	private List<String> matchedWords = new ArrayList<>();
+	
+	private double similarity;
 	
 	public String getUri() {
 		return uri;
@@ -34,8 +35,7 @@ public class Resource {
 
 	@Override
 	public String toString() {
-		return "Resource [uri=" + uri + ", label=" + label + ", similarity=" + similarity + ", parents=" + parents
-				+ "]";
+		return "Resource [uri=" + uri + ", label=" + label + "]";
 	}
 	@Override
 	public int hashCode() {
@@ -60,10 +60,10 @@ public class Resource {
 			return false;
 		return true;
 	}
-	public List<Resource> getParents() {
-		return parents;
+	public List<String> getMatchedWords() {
+		return matchedWords;
 	}
-	public void setParents(List<Resource> parents) {
-		this.parents = parents;
+	public void setMatchedWords(List<String> matchedWords) {
+		this.matchedWords = matchedWords;
 	}
 }

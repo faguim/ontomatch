@@ -5,7 +5,14 @@
 	<artifactId>OntoMatch</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
-	<build>
+	<repositories>
+		<repository>
+			<id>ziy-mvnrepo-releases</id>
+			<name>ziy GitHub Personal Repo</name>
+			<url>https://raw.github.com/ziy/mvn-releases/master/</url>
+		</repository>
+	</repositories>
+	<!-- <build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
 			<plugin>
@@ -24,7 +31,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
-	</build>
+	</build> -->
 	<dependencies>
 		<!-- https://mvnrepository.com/artifact/com.sun.jersey/jersey-bundle -->
 		<dependency>
@@ -81,5 +88,14 @@
 			<version>1.0.0</version>
 		</dependency>
 
+<dependency>
+  <groupId>edu.cmu.lti.oaqa.bio</groupId>
+  <artifactId>skr-webapi</artifactId>
+  <version>0.0.6</version>
+</dependency>
+
+
+
 	</dependencies>
+
 </project>
