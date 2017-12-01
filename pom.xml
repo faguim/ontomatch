@@ -1,18 +1,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>OntoMatch</groupId>
-	<artifactId>OntoMatch</artifactId>
+	<groupId>ontomatch</groupId>
+	<artifactId>ontomatch</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
-	<repositories>
-		<repository>
-			<id>ziy-mvnrepo-releases</id>
-			<name>ziy GitHub Personal Repo</name>
-			<url>https://raw.github.com/ziy/mvn-releases/master/</url>
-		</repository>
-	</repositories>
-	<!-- <build>
+
+	<!-- Isto irá instalar o .jar do metamap que está local, já que não achei 
+		no Maven Central -->
+	<properties>
+		<groupId>org.metamap</groupId>
+		<artifactId>metamap</artifactId>
+		<version>2.3</version>
+		<packaging>jar</packaging>
+		<file>lib/skrAPI.jar</file>
+	</properties>
+
+	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
 			<plugin>
@@ -30,8 +34,22 @@
 					<warSourceDirectory>WebContent</warSourceDirectory>
 				</configuration>
 			</plugin>
+
+			<!-- Isto é que chama o install-file definido acima para instalar o metamap -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>install</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
-	</build> -->
+	</build>
 	<dependencies>
 		<!-- https://mvnrepository.com/artifact/com.sun.jersey/jersey-bundle -->
 		<dependency>
@@ -88,14 +106,57 @@
 			<version>1.0.0</version>
 		</dependency>
 
-<dependency>
-  <groupId>edu.cmu.lti.oaqa.bio</groupId>
-  <artifactId>skr-webapi</artifactId>
-  <version>0.0.6</version>
-</dependency>
 
+		<!-- É preciso executar o pom duas vezes. A primeira com esta dependência 
+			comentada, para jogar o .jar do metamap pro repositório. A segunda executa 
+			com isto descomentado -->
+		<dependency>
+			<groupId>org.metamap</groupId>
+			<artifactId>metamap</artifactId>
+			<version>2.3</version>
+		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/commons-logging/commons-logging -->
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.1.1</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient-cache -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient-cache</artifactId>
+			<version>4.1.1</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpcore -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore</artifactId>
+			<version>4.1</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpcore-nio -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore-nio</artifactId>
+			<version>4.1-beta2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpmime -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpmime</artifactId>
+			<version>4.1.1</version>
+		</dependency>
 
 	</dependencies>
-
 </project>

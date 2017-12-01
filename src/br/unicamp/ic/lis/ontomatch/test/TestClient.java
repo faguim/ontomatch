@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import javax.ws.rs.core.MediaType;
 
-import org.apache.jena.atlas.json.JsonObject;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -20,6 +19,7 @@ public class TestClient {
 	public static void main(String[] args) throws IOException, JSONException {
 //		getResource();
 //		getResources();
+//		getWholeResource();
 		getMetaMapResource();
 	}
 
