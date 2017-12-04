@@ -17,10 +17,8 @@ import com.sun.jersey.api.json.JSONConfiguration;
 
 public class TestClient {
 	public static void main(String[] args) throws IOException, JSONException {
-//		getResource();
-//		getResources();
-//		getWholeResource();
-		getMetaMapResource();
+		getResources();
+//		getMetaMapResource();
 	}
 
 	private static void getResource() throws IOException, JSONException{
@@ -32,7 +30,7 @@ public class TestClient {
 		clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
 
 		Client client = Client.create(clientConfig);
-		WebResource webResource = client.resource("http://localhost:8080/OntoMatch/rest/resource");
+		WebResource webResource = client.resource("http://localhost:8080/ontomatch/rest/resource");
 //		WebResource webResource = client.resource("http://ontomatch.lis.ic.unicamp.br/api/rest/resource");
 
 		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON).type(MediaType.APPLICATION_JSON).post(ClientResponse.class, jsonParams);
@@ -44,6 +42,7 @@ public class TestClient {
 
 //		System.out.println("Response: " + responseBody);
 		JSONObject responseJson = new JSONObject(responseBody);
+		System.out.println(responseJson);
 //		System.out.println("Response Json: "+ responseJson);
 
 //		JSONObject resourceJSON = responseJson.getJSONObject("entity");
@@ -61,7 +60,7 @@ public class TestClient {
 		clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
 
 		Client client = Client.create(clientConfig);
-		WebResource webResource = client.resource("http://localhost:8080/OntoMatch/rest/resources");
+		WebResource webResource = client.resource("http://localhost:8080/ontomatch/rest/resources");
 
 		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON).type(MediaType.APPLICATION_JSON).post(ClientResponse.class, jsonParams);
 

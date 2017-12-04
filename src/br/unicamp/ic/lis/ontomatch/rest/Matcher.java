@@ -46,54 +46,11 @@ public class Matcher {
 	// public final static String HFO = "hfo";
 
 	@POST
-	@Path("/resource")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Resource getResource(String params) throws JSONException {
-
-		JSONObject jsonParams = new JSONObject(params);
-
-		String similarity = jsonParams.getString("similarity");
-		String ontology = jsonParams.getString("ontology");
-		String text = jsonParams.getString("text");
-
-		Resource resource = new Resource();
-
-		StringBuffer queryString = new StringBuffer();
-		queryString.append("PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "
-				+ "PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#> "
-				+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " + "PREFIX f: <java:"
-				+ this.getClass().getPackage().getName() + ".> "
-				+ "SELECT DISTINCT ?resource ?label (f:LevenshteinFilter(?label, \"" + text + "\") as ?similarity)"
-				+ "WHERE { ");
-
-		queryString.append("{?resource rdfs:label ?label . FILTER (f:LevenshteinFilter(?label, \"" + text + "\") >= "
-				+ similarity + ") }");
-
-		queryString.append("UNION {?resource oboinowl:hasExactSynonym ?label . FILTER (f:LevenshteinFilter(?label, \""
-				+ text + "\") >= " + similarity + ")} ");
-		queryString.append("UNION {?resource oboinowl:hasRelatedSynonym ?label . FILTER (f:LevenshteinFilter(?label, \""
-				+ text + "\") >= " + similarity + ")} ");
-		queryString.append("} ORDER BY DESC(f:LevenshteinFilter(?label, \"" + text + "\")) LIMIT 1");
-
-		Query sparql = QueryFactory.create(queryString.toString());
-		QueryExecution qExec = QueryExecutionFactory.create(sparql, getModel(ontology));
-		ResultSet rs = qExec.execSelect();
-		while (rs.hasNext()) {
-			QuerySolution result = rs.nextSolution();
-			resource.setLabel(result.getLiteral("label").getValue().toString());
-			resource.setUri(result.get("resource").toString());
-			resource.setSimilarity(result.getLiteral("similarity").getDouble());
-		}
-
-		return resource;
-	}
-
-	@POST
 	@Path("/resources")
-	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Resource> getResources(String params) throws JSONException {
+	public Response getResources(String params) throws JSONException, IOException {
+
+		System.out.println("POST /resources");
 
 		JSONObject jsonParams = new JSONObject(params);
 
@@ -101,8 +58,9 @@ public class Matcher {
 		String n = jsonParams.optString("n", "10");
 		String ontology = jsonParams.optString("ontology", "hfo");
 		String algorithm = jsonParams.optString("algorithm", "NormalizedLevenshtein");
-
-		String order = "DESC";
+		String floor = jsonParams.optString("floor", "0.0");
+		String ceiling = jsonParams.optString("ceiling", "1");
+		String order = jsonParams.optString("order", "DESC");
 
 		if (algorithm.equals("Levenshtein") || algorithm.equals("OptimalStringAlignment"))
 			order = "ASC";
@@ -116,8 +74,7 @@ public class Matcher {
 		query.append("PREFIX ontomatch: <java:br.unicamp.ic.lis.ontomatch.filters.> \n");
 
 		query.append("SELECT DISTINCT ?resource ?label (ontomatch:" + algorithm + "Filter(?label, \"" + text
-				+ "\") as ?similarity) \n"); // ?altlabel (ontomatch:NormalizedLevenshteinFilter(?altlabel,
-												// \""+text+"\") as ?similarityaltlabel) \n");
+				+ "\") as ?similarity) \n");
 		query.append("WHERE{ \n");
 		query.append("                 { ?resource        rdfs:label      ?label                 .   }   \n");
 		query.append("            UNION                                                                  \n");
@@ -125,32 +82,40 @@ public class Matcher {
 		query.append("                   ?resource        ?annotation     ?label                 .   }   \n");
 
 		query.append("     } \n");
+		query.append("HAVING (?similarity >= " + floor + " && ?similarity <=" + ceiling + ") \n");
 		query.append("ORDER BY " + order + "(?similarity) \n");
-		query.append("LIMIT " + n);
+		query.append("LIMIT " + n + " \n");
 
 		if (debbug)
 			System.out.println(query);
 
 		Query sparql = QueryFactory.create(query.toString());
+		model = getModel(ontology);
 		QueryExecution qExec = QueryExecutionFactory.create(sparql, getModel(ontology));
 		ResultSet rs = qExec.execSelect();
 
 		List<Resource> resources = new ArrayList<>();
+		if (null != rs) {
+			while (rs.hasNext()) {
+				QuerySolution result = rs.nextSolution();
+				Resource resource = new Resource();
+				resource.setLabel(result.getLiteral("label").getValue().toString());
+				resource.setUri(result.get("resource").toString());
+				resource.setSimilarity(result.getLiteral("similarity").getDouble());
 
-		while (rs.hasNext()) {
-			QuerySolution result = rs.nextSolution();
-			System.out.println(result.toString());
-			Resource resource = new Resource();
-			resource.setLabel(result.getLiteral("label").getValue().toString());
-			resource.setUri(result.get("resource").toString());
-			resource.setSimilarity(result.getLiteral("similarity").getDouble());
+				if (debbug)
+					System.out.println(resource);
 
-			// if(debbug)
-			// System.out.println(resource);
+				resources.add(resource);
+			}
 
-			resources.add(resource);
+			System.out.println(resources);
 		}
-		return resources;
+		GenericEntity<List<Resource>> resourcesReturn = new GenericEntity<List<Resource>>(resources) {
+		};
+		return Response.ok().entity(resourcesReturn).header("Access-Control-Allow-Origin", "*")
+				.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").build();
+
 	}
 
 	@POST
