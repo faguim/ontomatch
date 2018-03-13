@@ -4,7 +4,7 @@ Available at [http://ontomatch.lis.ic.unicamp.br](http://ontomatch.lis.ic.unicam
 
 This service parses a given text and returns [possible]associated entities(URIs) within an ontology. Associations are made using string similarity and distance measures of `rdfs:label` properties and subsequent `owl:AnnotationProperty` annotations linked to the resource -- usually adopted for adding properties acting as alternative labels.
 
-Available **ontologyIDs**: 
+Available **ontologyIDs**:
 [`pato`](https://bioportal.bioontology.org/ontologies/PATO),
 [`tao`](https://bioportal.bioontology.org/ontologies/TAO),
 [`xao`](https://bioportal.bioontology.org/ontologies/XAO),
@@ -13,7 +13,7 @@ Available **ontologyIDs**:
 
 The set of algorithms used in this project is based on the project [java-string-similarity](https://github.com/tdebatty/java-string-similarity). Please refer [to this link](https://github.com/tdebatty/java-string-similarity#overview) for further details and credits.
 
-Available **algorithmIDs** for string similarity and distance measures: 
+Available **algorithmIDs** for string similarity and distance measures:
 [`NormalizedLevenshtein`](https://github.com/tdebatty/java-string-similarity#normalized-levenshtein),
 [`JaroWinkler`](https://github.com/tdebatty/java-string-similarity#jaro-winkler),
 [`Cosine`](https://github.com/tdebatty/java-string-similarity#cosine-similarity),
@@ -23,7 +23,7 @@ Available **algorithmIDs** for string similarity and distance measures:
 [`OptimalStringAlignment`](https://github.com/tdebatty/java-string-similarity#optimal-string-alignment)
 
 
-
+dasdasdasd
 
 ### Based on a given similarity threshold (/api/rest/resources)
 
@@ -31,7 +31,7 @@ Available **algorithmIDs** for string similarity and distance measures:
 * **URL:**    `/api/rest/resources`
 
 * **Method:**  `POST`
-  
+
 *  **Required POST Params:**
 
    * `text=[string]`
@@ -46,7 +46,7 @@ Available **algorithmIDs** for string similarity and distance measures:
   * **Code:** 200 <br />
   * **Content:** JSON array <br />
 
- 
+
 * **Error Responses:**
 
   * **Code:** `415 Unsupported Media Type` <br />
@@ -57,8 +57,8 @@ Available **algorithmIDs** for string similarity and distance measures:
     **Troubleshooting:**  Ontology ID not found
 
 * **Sample Call:**
-  
-    * **Code:** 
+
+    * **Code:**
   ```javascript
     $.ajax({
       url: "http://ontomatch.lis.ic.unicamp.br/api/rest/resources",
