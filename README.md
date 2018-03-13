@@ -22,8 +22,7 @@ Available **algorithmIDs** for string similarity and distance measures:
 [`Levenshtein`](https://github.com/tdebatty/java-string-similarity#levenshtein),
 [`OptimalStringAlignment`](https://github.com/tdebatty/java-string-similarity#optimal-string-alignment)
 
-
-
+aaa
 
 ### Based on a given similarity threshold (/api/rest/resources)
 
