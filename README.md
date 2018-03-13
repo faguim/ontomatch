@@ -23,7 +23,7 @@ Available **algorithmIDs** for string similarity and distance measures:
 [`OptimalStringAlignment`](https://github.com/tdebatty/java-string-similarity#optimal-string-alignment)
 
 
-dasdasdasd
+
 
 ### Based on a given similarity threshold (/api/rest/resources)
 
