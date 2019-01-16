@@ -29,7 +29,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import br.unicamp.ic.lis.ontomatch.model.Resource;
-import gov.nih.nlm.nls.skr.GenericObject;
+//import gov.nih.nlm.nls.skr.GenericObject;
 
 @Path("")
 public class Matcher {
@@ -90,8 +90,7 @@ public class Matcher {
 			System.out.println(query);
 
 		Query sparql = QueryFactory.create(query.toString());
-		model = getModel(ontology);
-		QueryExecution qExec = QueryExecutionFactory.create(sparql, getModel(ontology));
+		QueryExecution qExec = QueryExecutionFactory.create(sparql, getModel(ontology, "xrdf"));
 		ResultSet rs = qExec.execSelect();
 
 		List<Resource> resources = new ArrayList<>();
@@ -118,78 +117,80 @@ public class Matcher {
 
 	}
 
-	@POST
-	@Path("/metamap/resources")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response getMetaMapResources(String params) throws JSONException, IOException {
-		System.out.println("POST /metamap/resources");
-		JSONObject jsonParams = new JSONObject(params);
-		String text = jsonParams.getString("text");
-
-		GenericObject myGenericObj = new GenericObject(100, "faguim", "esao3oMu");
-
-		myGenericObj.setField("Email_Address", "pantoja.ti@gmail.com");
-		myGenericObj.setField("KSOURCE", "1516");
-		myGenericObj.setField("COMMAND_ARGS", "-CIG --JSONn --silent -V USAbase");
-		myGenericObj.setField("APIText", text);
-
-		List<Resource> resources = new ArrayList<>();
-
-		try {
-			String result = myGenericObj.handleSubmission();
-			System.out.println(result.split("\n")[1]);
-			JSONObject jsonResult = new JSONObject(result.split("\n")[1]);
-			JSONArray allDocuments = (JSONArray) jsonResult.get("AllDocuments");
-			for (int i = 0; i < allDocuments.length(); i++) {
-				JSONObject document = (JSONObject) ((JSONObject) allDocuments.get(i)).get("Document");
-				JSONArray utterances = (JSONArray) document.get("Utterances");
-
-				for (int j = 0; j < utterances.length(); j++) {
-					JSONArray phrases = (JSONArray) ((JSONObject) utterances.get(j)).get("Phrases");
-					System.out.println(phrases);
-					for (int k = 0; k < phrases.length(); k++) {
-
-						JSONArray mappings = (JSONArray) ((JSONObject) phrases.get(k)).get("Mappings");
-						for (int l = 0; l < mappings.length(); l++) {
-							JSONArray mappingCandidates = (JSONArray) ((JSONObject) mappings.get(l))
-									.get("MappingCandidates");
-							for (int m = 0; m < mappingCandidates.length(); m++) {
-								Resource resource = new Resource();
-								resource.setLabel(
-										((JSONObject) mappingCandidates.get(m)).get("CandidatePreferred").toString());
-								resource.setUri(((JSONObject) mappingCandidates.get(m)).get("CandidateCUI").toString());
-
-								JSONArray matchedWords = (JSONArray) ((JSONObject) mappingCandidates.get(m))
-										.get("MatchedWords");
-								for (int n = 0; n < matchedWords.length(); n++) {
-									resource.getMatchedWords().add(matchedWords.get(n).toString());
-								}
-
-								if (!resources.contains(resource))
-									resources.add(resource);
-							}
-						}
-					}
-				}
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		GenericEntity<List<Resource>> resourcesReturn = new GenericEntity<List<Resource>>(resources) {
-		};
-		return Response.ok().entity(resourcesReturn).header("Access-Control-Allow-Origin", "*")
-				.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").build();
-	}
-
-	private Model getModel(String ontology) {
+	private Model getModel(String ontology, String extension) {
 		model = ModelFactory.createDefaultModel();
 
-		InputStream in = FileManager.get().open(ontology_dir + ontology + ".xrdf");
-		System.out.println(in);
-		model.read(in, null);
+		InputStream in = FileManager.get().open(ontology_dir + ontology + "."+ extension);
 
+		System.out.println(in);
+		model.read(in, null, extension);
+		System.out.println("loaded");
+		System.out.println(model);
 		return model;
 	}
+	
+//	@POST
+//	@Path("/metamap/resources")
+//	@Produces(MediaType.APPLICATION_JSON)
+//	public Response getMetaMapResources(String params) throws JSONException, IOException {
+//		System.out.println("POST /metamap/resources");
+//		JSONObject jsonParams = new JSONObject(params);
+//		String text = jsonParams.getString("text");
+//
+//		GenericObject myGenericObj = new GenericObject(100, "faguim", "esao3oMu");
+//
+//		myGenericObj.setField("Email_Address", "pantoja.ti@gmail.com");
+//		myGenericObj.setField("KSOURCE", "1516");
+//		myGenericObj.setField("COMMAND_ARGS", "-CIG --JSONn --silent -V USAbase");
+//		myGenericObj.setField("APIText", text);
+//
+//		List<Resource> resources = new ArrayList<>();
+//
+//		try {
+//			String result = myGenericObj.handleSubmission();
+//			System.out.println(result.split("\n")[1]);
+//			JSONObject jsonResult = new JSONObject(result.split("\n")[1]);
+//			JSONArray allDocuments = (JSONArray) jsonResult.get("AllDocuments");
+//			for (int i = 0; i < allDocuments.length(); i++) {
+//				JSONObject document = (JSONObject) ((JSONObject) allDocuments.get(i)).get("Document");
+//				JSONArray utterances = (JSONArray) document.get("Utterances");
+//
+//				for (int j = 0; j < utterances.length(); j++) {
+//					JSONArray phrases = (JSONArray) ((JSONObject) utterances.get(j)).get("Phrases");
+//					System.out.println(phrases);
+//					for (int k = 0; k < phrases.length(); k++) {
+//
+//						JSONArray mappings = (JSONArray) ((JSONObject) phrases.get(k)).get("Mappings");
+//						for (int l = 0; l < mappings.length(); l++) {
+//							JSONArray mappingCandidates = (JSONArray) ((JSONObject) mappings.get(l))
+//									.get("MappingCandidates");
+//							for (int m = 0; m < mappingCandidates.length(); m++) {
+//								Resource resource = new Resource();
+//								resource.setLabel(
+//										((JSONObject) mappingCandidates.get(m)).get("CandidatePreferred").toString());
+//								resource.setUri(((JSONObject) mappingCandidates.get(m)).get("CandidateCUI").toString());
+//
+//								JSONArray matchedWords = (JSONArray) ((JSONObject) mappingCandidates.get(m))
+//										.get("MatchedWords");
+//								for (int n = 0; n < matchedWords.length(); n++) {
+//									resource.getMatchedWords().add(matchedWords.get(n).toString());
+//								}
+//
+//								if (!resources.contains(resource))
+//									resources.add(resource);
+//							}
+//						}
+//					}
+//				}
+//			}
+//
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//
+//		GenericEntity<List<Resource>> resourcesReturn = new GenericEntity<List<Resource>>(resources) {
+//		};
+//		return Response.ok().entity(resourcesReturn).header("Access-Control-Allow-Origin", "*")
+//				.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").build();
+//	}
 }
