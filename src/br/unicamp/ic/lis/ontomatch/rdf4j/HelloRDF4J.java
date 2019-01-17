@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.TupleQueryResult;
@@ -38,6 +39,9 @@ public class HelloRDF4J {
 		String ceiling = "1";
 		String order = "DESC";
 		
+		if (algorithm.equals("Levenshtein") || algorithm.equals("OptimalStringAlignment"))
+			order = "ASC";
+		
 		try(RepositoryConnection conn = nativeRep.getConnection()) {
 			StringBuffer query = new StringBuffer();
 			query.append("PREFIX owl:       <http://www.w3.org/2002/07/owl#> \n");
@@ -56,7 +60,11 @@ public class HelloRDF4J {
 			query.append("                   ?resource        ?annotation     ?label                 .   }   \n");
 
 			query.append("     } \n");
+			query.append("GROUP BY	 ?resource  ?label \n");
+//			query.append("HAVING (?similarity >= " + floor + " && ?similarity <=" + ceiling + ") \n");
 
+			query.append("ORDER BY " + order + "(?similarity) \n");
+			query.append("LIMIT " + n + " \n");
 			System.out.println(query.toString());
 			TupleQuery tupleQuery = conn.prepareTupleQuery(query.toString());
 			TupleQueryResult result = tupleQuery.evaluate();
@@ -69,7 +77,12 @@ public class HelloRDF4J {
 					BindingSet bindingSet = result.next();
 					Value firstValue = bindingSet.getValue(bindingNames.get(0));
 					Value secondValue = bindingSet.getValue(bindingNames.get(1));
+					Value thirdValue = bindingSet.getValue(bindingNames.get(2));
+
 					System.out.println(firstValue);
+					System.out.println(secondValue);
+					System.out.println("sim: "+thirdValue);
+
 				}
 			} finally {
 				result.close();
