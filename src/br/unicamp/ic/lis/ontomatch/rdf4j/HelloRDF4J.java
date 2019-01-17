@@ -30,14 +30,42 @@ public class HelloRDF4J {
 		Repository nativeRep = new SailRepository(new NativeStore(dataStore));
 		nativeRep.initialize();
 		
+		String text = "chest pain";
+		String n = "10";
+		String ontology = "mesh";
+		String algorithm = "Levenshtein";
+		String floor = "0.0";
+		String ceiling = "1";
+		String order = "DESC";
+		
 		try(RepositoryConnection conn = nativeRep.getConnection()) {
-			String queryString = "SELECT ?x ?y WHERE { ?x ?p ?y }";
-			TupleQuery tupleQuery = conn.prepareTupleQuery(queryString);	
+			StringBuffer query = new StringBuffer();
+			query.append("PREFIX owl:       <http://www.w3.org/2002/07/owl#> \n");
+			query.append("PREFIX rdf:       <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n");
+			query.append("PREFIX rdfs:      <http://www.w3.org/2000/01/rdf-schema#> \n");
+			query.append("PREFIX oboinowl:  <http://www.geneontology.org/formats/oboInOwl#> \n");
+			query.append("PREFIX xsd:       <http://www.w3.org/2001/XMLSchema#> \n");
+			query.append("PREFIX ontomatch: <http://lis.ic.unicamp.br/similarityfunction/> \n");
+
+			query.append("SELECT DISTINCT ?resource ?label (ontomatch:" + algorithm + "Filter(?label, \"" + text
+					+ "\") as ?similarity) \n");
+			query.append("WHERE{ \n");
+			query.append("                 { ?resource        rdfs:label      ?label                 .   }   \n");
+			query.append("            UNION                                                                  \n");
+			query.append("                 { ?annotation      rdf:type        owl:AnnotationProperty .       \n");
+			query.append("                   ?resource        ?annotation     ?label                 .   }   \n");
+
+			query.append("     } \n");
+
+			System.out.println(query.toString());
+			TupleQuery tupleQuery = conn.prepareTupleQuery(query.toString());
 			TupleQueryResult result = tupleQuery.evaluate();
-			
+			System.out.println(result);
 			try {
 				List<String> bindingNames = result.getBindingNames();
+				System.out.println(bindingNames);
 				while (result.hasNext()) {
+					System.out.println("tem");
 					BindingSet bindingSet = result.next();
 					Value firstValue = bindingSet.getValue(bindingNames.get(0));
 					Value secondValue = bindingSet.getValue(bindingNames.get(1));
@@ -46,11 +74,55 @@ public class HelloRDF4J {
 			} finally {
 				result.close();
 			}
+//			StringBuffer query = new StringBuffer();
+//			query.append("PREFIX owl:       <http://www.w3.org/2002/07/owl#> \n");
+//			query.append("PREFIX rdf:       <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n");
+//			query.append("PREFIX rdfs:      <http://www.w3.org/2000/01/rdf-schema#> \n");
+//			query.append("PREFIX oboinowl:  <http://www.geneontology.org/formats/oboInOwl#> \n");
+//			query.append("PREFIX xsd:       <http://www.w3.org/2001/XMLSchema#> \n");
+//			query.append("PREFIX ontomatch: <http://lis.ic.unicamp.br/similatiryfunction/> \n");
+//
+//			query.append("SELECT DISTINCT ?resource ?label (ontomatch:" + algorithm + "Filter(?label, \"" + text
+//					+ "\") as ?similarity) \n");
+//			query.append("WHERE{ \n");
+//			query.append("                 { ?resource        rdfs:label      ?label                 .   }   \n");
+//			query.append("            UNION                                                                  \n");
+//			query.append("                 { ?annotation      rdf:type        owl:AnnotationProperty .       \n");
+//			query.append("                   ?resource        ?annotation     ?label                 .   }   \n");
+//
+//			query.append("     } \n");
+//			query.append("GROUP BY ?resource ?label\n");
+//			query.append("HAVING (?similarity >= " + floor + " && ?similarity <=" + ceiling + ") \n");
+//			query.append("ORDER BY " + order + "(?similarity) \n");
+//			query.append("LIMIT " + n + " \n");
+			
+			
+//			String queryString = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" + 
+//					"PREFIX sim: <http://lis.ic.unicamp.br/similatiryfunction/>\n" + 
+//					"SELECT ?x ?label\n" + 
+//					"WHERE {\n" + 
+//					"   ?x rdfs:label ?label .\n" + 
+//					"   FILTER(sim:LevenshteinFilter(str(?label)>0.9))\n" + 
+//					"}";
+//			TupleQuery tupleQuery = conn.prepareTupleQuery(queryString);	
+//			TupleQueryResult result = tupleQuery.evaluate();
+//			
+//			try {
+//				List<String> bindingNames = result.getBindingNames();
+//				while (result.hasNext()) {
+//					BindingSet bindingSet = result.next();
+//					Value firstValue = bindingSet.getValue(bindingNames.get(0));
+//					Value secondValue = bindingSet.getValue(bindingNames.get(1));
+//					System.out.println(firstValue);
+//				}
+//			} finally {
+//				result.close();
+//			}
 		}
 	}
 	
 	public static void createDB() throws RepositoryException, IOException {
-File dataStore = new File("resources/ontologies/mesh/store");
+		File dataStore = new File("resources/ontologies/mesh/store");
 		
 		// É preciso executar o seguinte comando no shell para criar os chunks a partir do .nt gigante
 		// split -l 100000 mesh.nt 
@@ -112,6 +184,7 @@ File dataStore = new File("resources/ontologies/mesh/store");
 	}
 	
 	public static void main(String[] args) throws UnsupportedRDFormatException, IOException {
-		simpleSPARQL();
+//		createDB();
+				simpleSPARQL();
 	}
 }
