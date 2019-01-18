@@ -1,5 +1,6 @@
 package br.unicamp.ic.lis.ontomatch.rest;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -27,6 +28,14 @@ import org.apache.jena.util.FileManager;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.TupleQueryResult;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.sail.SailRepository;
+import org.eclipse.rdf4j.sail.nativerdf.NativeStore;
 
 import br.unicamp.ic.lis.ontomatch.model.Resource;
 //import gov.nih.nlm.nls.skr.GenericObject;
@@ -116,7 +125,130 @@ public class Matcher {
 				.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").build();
 
 	}
+	
+//	Repository nativeRep;
+	@POST
+	@Path("/start")
+	@Produces(MediaType.APPLICATION_JSON)
+	public void start() {
+		System.out.println("Initializing");
+		ClassLoader classLoader = getClass().getClassLoader(); 
+		File dataStore = new File(classLoader.getResource(ontology_dir+"mesh/store").getFile());
+		System.out.println(dataStore.getAbsolutePath());
+		
+		System.out.println("Finished");
+	}
+	
+	@POST
+	@Path("/mesh")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getMeshTerms(String params) throws JSONException {
+		System.out.println("POST /resources");
 
+		ClassLoader classLoader = getClass().getClassLoader(); 
+		File dataStore = new File(classLoader.getResource(ontology_dir+"mesh/store").getFile());
+		System.out.println(dataStore.getAbsolutePath());
+		
+		Repository nativeRep = new SailRepository(new NativeStore(dataStore));
+		nativeRep.initialize();
+		
+		
+		JSONObject jsonParams = new JSONObject(params);
+
+		String text = jsonParams.getString("text");
+		String n = jsonParams.optString("n", "10");
+		String ontology = jsonParams.optString("ontology", "mesh");
+		String algorithm = jsonParams.optString("algorithm", "NormalizedLevenshtein");
+		String floor = jsonParams.optString("floor", "0.0");
+		String ceiling = jsonParams.optString("ceiling", "1");
+		String order = jsonParams.optString("order", "DESC");
+
+		if (algorithm.equals("Levenshtein") || algorithm.equals("OptimalStringAlignment"))
+			order = "ASC";
+		
+		List<Resource> resources = new ArrayList<>();
+		
+		RepositoryConnection conn = null;
+		try {
+			conn = nativeRep.getConnection();
+			StringBuffer query = new StringBuffer();
+			query.append("PREFIX owl:       <http://www.w3.org/2002/07/owl#> \n");
+			query.append("PREFIX rdf:       <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n");
+			query.append("PREFIX rdfs:      <http://www.w3.org/2000/01/rdf-schema#> \n");
+			query.append("PREFIX oboinowl:  <http://www.geneontology.org/formats/oboInOwl#> \n");
+			query.append("PREFIX xsd:       <http://www.w3.org/2001/XMLSchema#> \n");
+			query.append("PREFIX ontomatch: <http://lis.ic.unicamp.br/similarityfunction/> \n");
+
+			query.append("SELECT DISTINCT ?resource ?label (ontomatch:" + algorithm + "Filter(?label, \"" + text
+					+ "\") as ?similarity) \n");
+			query.append("WHERE{ \n");
+			query.append("                 { ?resource        rdfs:label      ?label                 .   }   \n");
+			query.append("            UNION                                                                  \n");
+			query.append("                 { ?annotation      rdf:type        owl:AnnotationProperty .       \n");
+			query.append("                   ?resource        ?annotation     ?label                 .   }   \n");
+
+			query.append("     } \n");
+			query.append("GROUP BY	 ?resource  ?label \n");
+//			query.append("HAVING (?similarity >= " + floor + " && ?similarity <=" + ceiling + ") \n");
+
+			query.append("ORDER BY " + order + "(?similarity) \n");
+			query.append("LIMIT " + n + " \n");
+
+			if (debbug)
+				System.out.println(query);
+			
+//			System.out.println(result);
+			TupleQuery tupleQuery = conn.prepareTupleQuery(query.toString());
+			TupleQueryResult result = tupleQuery.evaluate();
+			List<String> bindingNames = result.getBindingNames();
+			BindingSet bindingSet = result.next();
+			System.out.println(bindingSet);
+			Value firstValue = bindingSet.getValue(bindingNames.get(0));
+//			Value secondValue = bindingSet.getValue(bindingNames.get(1));
+//			Value thirdValue = bindingSet.getValue(bindingNames.get(2));
+
+//			try {
+//				while (result.hasNext()) {
+////					List<String> bindingNames = result.getBindingNames();
+////					System.out.println(bindingNames);
+//					BindingSet bindingSet = result.next();
+//					System.out.println(bindingSet);
+////					Value firstValue = bindingSet.getValue(bindingNames.get(0));
+////					Value secondValue = bindingSet.getValue(bindingNames.get(1));
+////					Value thirdValue = bindingSet.getValue(bindingNames.get(2));
+////
+////					System.out.println(firstValue.stringValue());
+////					System.out.println(secondValue.stringValue());
+////					System.out.println(thirdValue.stringValue());
+////					
+////					Resource resource = new Resource();
+////					resource.setLabel(firstValue.stringValue());
+////					resource.setUri(secondValue.stringValue());
+////					resource.setSimilarity(Double.parseDouble(thirdValue.stringValue()));
+////
+////					if (debbug)
+////						System.out.println(resource);
+////
+////					resources.add(resource);
+//				}
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			} finally {
+//				System.out.println("finally");
+//				result.close();
+//			}
+		}finally {
+			conn.close();
+		    // Before our program exits, make sure the database is properly shut down.
+//			nativeRep.shutDown();
+		}
+		
+		GenericEntity<List<Resource>> resourcesReturn = new GenericEntity<List<Resource>>(resources) {
+		};
+		return Response.ok().entity(resourcesReturn).header("Access-Control-Allow-Origin", "*")
+				.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").build();
+	}
+	
 	private Model getModel(String ontology, String extension) {
 		model = ModelFactory.createDefaultModel();
 
@@ -128,6 +260,16 @@ public class Matcher {
 		System.out.println(model);
 		return model;
 	}
+	
+	private static Matcher instance;
+	
+//	public static synchronized Matcher getInstance() {
+//		if (instance == null) {
+//			instance = new Matcher();
+//		} return instance;
+//	}
+	
+	
 	
 //	@POST
 //	@Path("/metamap/resources")

@@ -20,14 +20,12 @@ public class LevenshteinFilter implements Function{
 
 	@Override
 	public Value evaluate(ValueFactory valueFactory, Value... args) throws ValueExprEvaluationException {
-//		System.out.println("[rd4] aquiiiiiiiiii");
 		Levenshtein algorithm = new Levenshtein();
 		Literal string1 = (Literal) args[0];
-//		System.out.println("string1" + string1);
 		Literal string2 = (Literal) args[1];
-//		System.out.println("string2" + string2);
+
 		double i = algorithm.distance(string1.getLabel().toLowerCase(), string2.getLabel().toLowerCase());
-		System.out.println("similarity: " + valueFactory.createLiteral(i));
+
 		return valueFactory.createLiteral(i);
 	}
 
