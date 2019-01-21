@@ -1,7 +1,8 @@
 package br.unicamp.ic.lis.ontomatch.filters;
 
-import org.apache.jena.sparql.expr.NodeValue;
-import org.apache.jena.sparql.function.FunctionBase2;
+
+import com.hp.hpl.jena.sparql.expr.NodeValue;
+import com.hp.hpl.jena.sparql.function.FunctionBase2;
 
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
 
