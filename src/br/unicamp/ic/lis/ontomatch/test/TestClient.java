@@ -17,7 +17,6 @@ import com.sun.jersey.api.json.JSONConfiguration;
 
 public class TestClient {
 	public static void main(String[] args) throws IOException, JSONException {
-//		start();
 		getMeshTerms();
 //		getResources();
 //		getMetaMapResource();
@@ -84,18 +83,6 @@ public class TestClient {
 //		}
 //		
 	}
-	
-	private static void start() {
-		ClientConfig clientConfig = new DefaultClientConfig();
-		clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
-
-		Client client = Client.create(clientConfig);
-		System.out.println("foi");
-		WebResource webResource = client.resource("http://localhost:8080/ontomatch/rest/start");
-		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON).type(MediaType.APPLICATION_JSON).post(ClientResponse.class);
-		System.out.println("de novo");
-	}
-
 	
 	private static void getMeshTerms() throws IOException, JSONException{
 		String params = "{text:chest pain, n:5, ontology:mesh, algorithm:Levenshtein}";

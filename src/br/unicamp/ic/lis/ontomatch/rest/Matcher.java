@@ -18,17 +18,8 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.query.BindingSet;
-import org.eclipse.rdf4j.query.TupleQuery;
-import org.eclipse.rdf4j.query.TupleQueryResult;
-import org.eclipse.rdf4j.repository.Repository;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.sail.SailRepository;
-import org.eclipse.rdf4j.sail.nativerdf.NativeStore;
 
 import com.hp.hpl.jena.query.Dataset;
 import com.hp.hpl.jena.query.Query;
@@ -41,14 +32,10 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.tdb.TDBFactory;
-import com.hp.hpl.jena.tdb.TDBLoader;
-import com.hp.hpl.jena.tdb.base.file.Location;
-import com.hp.hpl.jena.tdb.sys.TDBInternal;
 import com.hp.hpl.jena.util.FileManager;
 
 import br.unicamp.ic.lis.ontomatch.model.Resource;
 //import gov.nih.nlm.nls.skr.GenericObject;
-import br.unicamp.ic.lis.ontomatch.test.jena.RDFTripleExtractor;
 
 @Path("")
 public class Matcher {
@@ -170,8 +157,7 @@ public class Matcher {
 				dataset.begin(ReadWrite.READ);
 				Model tdb = dataset.getDefaultModel();
 				
-				System.out.println(tdb);
-				System.out.println(tdb.isEmpty());
+				System.out.println("Empty? "+tdb.isEmpty());
 		
 				
 				System.out.println("POST /mesh");
@@ -189,18 +175,26 @@ public class Matcher {
 				if (algorithm.equals("Levenshtein") || algorithm.equals("OptimalStringAlignment"))
 					order = "ASC";
 				
-				StringBuffer stringBuffer = new StringBuffer();
-				stringBuffer.append("PREFIX rdf:       <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n");
-				stringBuffer.append("PREFIX rdfs:      <http://www.w3.org/2000/01/rdf-schema#> \n");
-				stringBuffer.append("PREFIX ontomatch: <java:br.unicamp.ic.lis.ontomatch.filters.> \n");
+				StringBuffer stringQuery = new StringBuffer();
+				stringQuery.append("PREFIX owl:       <http://www.w3.org/2002/07/owl#> \n");
+				stringQuery.append("PREFIX rdf:       <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n");
+				stringQuery.append("PREFIX rdfs:      <http://www.w3.org/2000/01/rdf-schema#> \n");
+				stringQuery.append("PREFIX ontomatch: <java:br.unicamp.ic.lis.ontomatch.filters.> \n");
 				
-				stringBuffer.append("SELECT DISTINCT ?resource ?label \n");
-				stringBuffer.append("WHERE{ \n");
-				stringBuffer.append("                 { ?resource        rdfs:label      ?label                 .   } \n");
-				stringBuffer.append("     } \n");
-				stringBuffer.append("LIMIT " + n + " \n");
+				stringQuery.append("SELECT DISTINCT ?resource ?label (ontomatch:" + algorithm + "Filter(?label, \"" + text
+						+ "\") as ?similarity) \n");
+				stringQuery.append("WHERE{ \n");
+				stringQuery.append("                 { ?resource        rdfs:label      ?label                 .   }   \n");
+				stringQuery.append("            UNION                                                                  \n");
+				stringQuery.append("                 { ?annotation      rdf:type        owl:AnnotationProperty .       \n");
+				stringQuery.append("                   ?resource        ?annotation     ?label                 .   }   \n");
+
+				stringQuery.append("     } \n");
+				stringQuery.append("HAVING (?similarity >= " + floor + " && ?similarity <=" + ceiling + ") \n");
+				stringQuery.append("ORDER BY " + order + "(?similarity) \n");
+				stringQuery.append("LIMIT " + n + " \n");
 				
-				Query query = QueryFactory.create(stringBuffer.toString());
+				Query query = QueryFactory.create(stringQuery.toString());
 				System.out.println(query);
 				QueryExecution qexec = QueryExecutionFactory.create(query, tdb);
 		

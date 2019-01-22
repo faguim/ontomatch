@@ -9,7 +9,6 @@ import info.debatty.java.stringsimilarity.Levenshtein;
 public class LevenshteinFilter extends FunctionBase2 {
 
 	public NodeValue exec(NodeValue string1, NodeValue string2) {
-		System.out.println("filter");
 		Levenshtein algorithm = new Levenshtein();
 		
 		double i = algorithm.distance(string1.asString().toLowerCase(), string2.asString().toLowerCase());
